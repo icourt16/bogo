@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOGO Product Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .product-options {
+            padding: 20px;
+        }
+
+        .option {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background-color: white;
+        }
+
+        .option:hover {
+            border-color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+        }
+
+        .option.selected {
+            border-color: #ff6b6b;
+            background-color: #fff5f5;
+        }
+
+        .option.most-popular {
+            border-color: #e1e5e9;
+            background-color: white;
+        }
+
+        .option.most-popular.selected {
+            border-color: #ff6b6b;
+            background-color: #fff5f5;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .discount-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .option-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .option-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio.checked {
+            border-color: #ff6b6b;
+        }
+
+        .radio.checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            border-radius: 50%;
+        }
+
+        .unit-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .size-color-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
+            display: none; /* Initially hidden */
+        }
+
+        .option.selected .size-color-section {
+            display: grid; /* Show when option is selected */
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .product-images {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            display: none; /* Initially hidden */
+        }
+
+        .option.selected .product-images {
+            display: flex; /* Show when option is selected */
+        }
+
+        .product-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .delivery-info {
+            color: #ff6b6b;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .total-label {
+            color: #666;
+        }
+
+        .total-price {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-cart:hover {
+            background: #ff5252;
+        }
+
+        .add-to-cart:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .powered-by {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            YAY! It's BOGO
+        </div>
+        
+        <div class="product-options">
+            <div class="option" data-option="1" data-price="10.00">
+                <div class="option-header">
+                    <div class="option-title">
+                        <div class="radio" id="radio1"></div>
+                        <div>
+                            <div class="discount-badge">Buy 1 Get 1 Free</div>
+                            <div class="unit-text">1 Unit</div>
+                        </div>
+                    </div>
+                    <div class="price">$10.00 USD</div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size</label>
+                        <select class="size-select" data-item="1">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour</label>
+                        <select class="color-select" data-item="1">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="product-images">
+                    <div class="product-image">👕</div>
+                </div>
+            </div>
+
+            <div class="option most-popular" data-option="2" data-price="18.00">
+                <div class="popular-badge">MOST POPULAR</div>
+                <div class="option-header">
+                    <div class="option-title">
+                        <div class="radio" id="radio2"></div>
+                        <div>
+                            <div class="discount-badge">Buy 2 Get 1 Free</div>
+                            <div class="unit-text">2 Unit</div>
+                        </div>
+                    </div>
+                    <div class="price">$18.00 USD</div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size #1</label>
+                        <select class="size-select" data-item="1">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour #1</label>
+                        <select class="color-select" data-item="1">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size #2</label>
+                        <select class="size-select" data-item="2">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour #2</label>
+                        <select class="color-select" data-item="2">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="product-images">
+                    <div class="product-image">👕</div>
+                    <div class="product-image">👕</div>
+                </div>
+            </div>
+
+            <div class="option" data-option="3" data-price="24.00">
+                <div class="option-header">
+                    <div class="option-title">
+                        <div class="radio" id="radio3"></div>
+                        <div>
+                            <div class="discount-badge">Buy 3 Get 2 Free</div>
+                            <div class="unit-text">3 Unit</div>
+                        </div>
+                    </div>
+                    <div class="price">$24.00 USD</div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size #1</label>
+                        <select class="size-select" data-item="1">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour #1</label>
+                        <select class="color-select" data-item="1">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size #2</label>
+                        <select class="size-select" data-item="2">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour #2</label>
+                        <select class="color-select" data-item="2">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="size-color-section">
+                    <div class="form-group">
+                        <label>Size #3</label>
+                        <select class="size-select" data-item="3">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Colour #3</label>
+                        <select class="color-select" data-item="3">
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Red">Red</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="product-images">
+                    <div class="product-image">👕</div>
+                    <div class="product-image">👕</div>
+                    <div class="product-image">👕</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="delivery-info">Free Delivery</div>
+            <div class="total">
+                <span class="total-label">Total :</span>
+                <span class="total-price" id="totalPrice">$0.00 USD</span>
+            </div>
+            <button class="add-to-cart" id="addToCart" disabled>
+                + Add to Cart
+            </button>
+            <div class="powered-by">⚡ Powered by Pumper</div>
+        </div>
+    </div>
+
+    <script>
+        class BOGOSelector {
+            constructor() {
+                this.selectedOption = null; // No option selected initially
+                this.prices = {
+                    1: 10.00,
+                    2: 18.00,
+                    3: 24.00
+                };
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateTotal();
+            }
+
+            bindEvents() {
+                // Add click event listeners to all options
+                document.querySelectorAll('.option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        const optionNumber = parseInt(option.dataset.option);
+                        this.selectOption(optionNumber);
+                    });
+                });
+
+                // Add to cart button
+                document.getElementById('addToCart').addEventListener('click', () => {
+                    this.addToCart();
+                });
+
+                // Size and color selectors
+                document.querySelectorAll('select').forEach(select => {
+                    select.addEventListener('change', (e) => {
+                        e.stopPropagation(); // Prevent option selection when changing dropdowns
+                    });
+                });
+            }
+
+            selectOption(optionNumber) {
+                // Remove selected class from all options
+                document.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                // Remove checked class from all radios
+                document.querySelectorAll('.radio').forEach(radio => {
+                    radio.classList.remove('checked');
+                });
+
+                // Add selected class to clicked option
+                const selectedOption = document.querySelector(`[data-option="${optionNumber}"]`);
+                selectedOption.classList.add('selected');
+                
+                // Add checked class to corresponding radio
+                document.getElementById(`radio${optionNumber}`).classList.add('checked');
+
+                this.selectedOption = optionNumber;
+                this.updateTotal();
+                this.showSelectedOptionDetails();
+                
+                // Enable add to cart button
+                document.getElementById('addToCart').disabled = false;
+            }
+
+            showSelectedOptionDetails() {
+                // Hide all size/color sections and product images first
+                document.querySelectorAll('.size-color-section, .product-images').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Show only for selected option
+                const selectedOption = document.querySelector('.option.selected');
+                if (selectedOption) {
+                    const sections = selectedOption.querySelectorAll('.size-color-section, .product-images');
+                    sections.forEach(el => {
+                        el.style.display = el.classList.contains('size-color-section') ? 'grid' : 'flex';
+                    });
+                }
+            }
+
+            updateTotal() {
+                const totalPrice = this.selectedOption ? this.prices[this.selectedOption] : 0;
+                document.getElementById('totalPrice').textContent = `$${totalPrice.toFixed(2)} USD`;
+            }
+
+            addToCart() {
+                if (!this.selectedOption) return;
+
+                const selectedData = {
+                    option: this.selectedOption,
+                    price: this.prices[this.selectedOption],
+                    total: this.prices[this.selectedOption],
+                    items: []
+                };
+
+                // Get all size and color selections for the selected option
+                const selectedOptionEl = document.querySelector('.option.selected');
+                const sizeSelects = selectedOptionEl.querySelectorAll('.size-select');
+                const colorSelects = selectedOptionEl.querySelectorAll('.color-select');
+
+                // Add each item's size and color to the cart data
+                for (let i = 0; i < sizeSelects.length; i++) {
+                    selectedData.items.push({
+                        size: sizeSelects[i].value,
+                        color: colorSelects[i].value
+                    });
+                }
+
+                // Simulate adding to cart
+                alert(`Added to cart!\nOption: ${this.selectedOption} Unit\nTotal: $${selectedData.total.toFixed(2)} USD`);
+                
+                console.log('Cart Data:', selectedData);
+            }
+        }
+
+        // Initialize the BOGO selector when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new BOGOSelector();
+        });
+    </script>
+</body>
+</html>
